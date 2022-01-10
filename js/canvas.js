@@ -63,43 +63,49 @@ function updateDimensions() {
   window.height = ratio.height;
   window.canvas.width = width;
   window.canvas.height = height;
-  window.tile_width = width / (window.width + 2);
-  window.tile_height = height / (window.height + 2);
+  window.tile_dim = Math.min(
+    width / (window.width + 1),
+    height / (window.height + 1)
+  );
+  window.offset_x = (width - (window.width * window.tile_dim)) / 2;
+  window.offset_y = (height - (window.height * window.tile_dim)) / 2;
 
   for (var i = 0; i < 48; i++)
     render_tile(i);
 }
 
 function render_tile(index) {
-  var x = (index % window.width + 1) * window.tile_width,
-      y = (Math.floor(index / window.width) + 1) * window.tile_height,
-      min_dim = Math.min(window.tile_width, window.tile_height),
-      r = min_dim / 10,
-      margin = min_dim / 20;
+  var x = (index % window.width) * window.tile_dim + window.offset_x,
+      y = Math.floor(index / window.width) * window.tile_dim + window.offset_y,
+      r = window.tile_dim / 20,
+      margin = window.tile_dim / 50;
 
   window.ctx.beginPath();
   window.ctx.strokeStyle="black";
   window.ctx.moveTo(x + r + margin, y + margin);
-  window.ctx.lineTo(x + window.tile_width - r - margin, y + margin);
+  window.ctx.lineTo(x + window.tile_dim - r - margin, y + margin);
   window.ctx.quadraticCurveTo(
-    x + window.tile_width - margin,
+    x + window.tile_dim - margin,
     y + margin,
-    x + window.tile_width - margin,
+    x + window.tile_dim - margin,
     y + r + margin
   );
-  window.ctx.lineTo(x + window.tile_width - margin, y + window.tile_height - r - margin);
-  window.ctx.quadraticCurveTo(
-    x + window.tile_width - margin,
-    y + window.tile_height - margin,
-    x + window.tile_width - r - margin,
-    y + window.tile_height - margin
+  window.ctx.lineTo(
+    x + window.tile_dim - margin,
+    y + window.tile_dim - r - margin
   );
-  window.ctx.lineTo(x + r + margin, y + window.tile_height - margin);
+  window.ctx.quadraticCurveTo(
+    x + window.tile_dim - margin,
+    y + window.tile_dim - margin,
+    x + window.tile_dim - r - margin,
+    y + window.tile_dim - margin
+  );
+  window.ctx.lineTo(x + r + margin, y + window.tile_dim - margin);
   window.ctx.quadraticCurveTo(
     x + margin,
-    y + window.tile_height - margin,
+    y + window.tile_dim - margin,
     x + margin,
-    y + window.tile_height - r - margin
+    y + window.tile_dim - r - margin
   );
   window.ctx.lineTo(x + margin, y + r + margin);
   window.ctx.quadraticCurveTo(x + margin, y + margin, x + r + margin, y + margin);

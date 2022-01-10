@@ -38,25 +38,33 @@ function onMouseDown() {
 }
 
 function onMouseUp() {
+  var index = getTileClicked();
+}
+
+function getTileClicked() {
+  var x = Math.floor((window.mouseX - window.offsetX) / window.tileDim),
+      y = Math.floor((window.mouseY - window.offsetY) / window.tileDim);
+  if (x < 0 || x >= window.width || y < 0 || y >= window.height) return -1;
+  return x + y * window.width;
 }
 
 function updateDimensions() {
   var width = window.canvas.getBoundingClientRect().width,
-      height = window.canvas.getBoundingClientRect().height;
-  window.whRatio = width / height;
+      height = window.canvas.getBoundingClientRect().height,
+      whRatio = width / height;
 
   var lo = 0,
       hi = window.ratios.length - 1,
       mid;
   while (hi > lo + 1) {
     mid = Math.floor((hi + lo) / 2);
-    if (window.whRatio > window.ratios[mid].ratio) lo = mid;
+    if (whRatio > window.ratios[mid].ratio) lo = mid;
     else hi = mid;
   }
 
   var ratio;
-  if (window.whRatio - window.ratios[lo].ratio < 
-      window.ratios[hi].ratio - window.whRatio) ratio = window.ratios[lo];
+  if (whRatio - window.ratios[lo].ratio < 
+      window.ratios[hi].ratio - whRatio) ratio = window.ratios[lo];
   else ratio = window.ratios[hi];
 
   window.width = ratio.width;

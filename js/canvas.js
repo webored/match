@@ -50,7 +50,7 @@ function onMouseDown() {
 
 function onMouseUp() {
   var index = getTileClicked();
-  if (index < 0 || window.tileStates[index] != COVERED) return;
+  if (index < 0 || index >= 48 || window.tileStates[index] != COVERED) return;
   /*
   if (window.selection.length == 2) {
     window.selection[0];
@@ -60,6 +60,8 @@ function onMouseUp() {
     }
   }
   */
+  window.tileStates[index] = UNCOVERED;
+  renderTile(index);
 }
 
 function getTileClicked() {
@@ -144,7 +146,7 @@ function renderTile(index) {
   );
   window.ctx.stroke();
 
-  if (window.tileStates[index] == UNCOVERED) {
+  if (window.tileStates[index] == SOLVED) {
     window.ctx.fillStyle = "grey";
     window.ctx.fill();
   }

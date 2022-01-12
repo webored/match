@@ -24,7 +24,7 @@ function init() {
   ].map(x => ({
     width: x.width,
     height: x.height,
-    ratio: x.width / x.height
+    ratio: (x.width + 1) / (x.height + 1)
   }));
 
   window.tileStates = new Array(24).fill(COVERED);

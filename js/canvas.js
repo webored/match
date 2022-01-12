@@ -13,8 +13,6 @@ function init() {
   window.mouseY = 0;
 
   window.ratios = [
-    {width: 1, height: 24},
-    {width: 2, height: 12},
     {width: 3, height: 8},
     {width: 4, height: 6},
     {width: 6, height: 4},
@@ -28,11 +26,16 @@ function init() {
   }));
 
   window.tileStates = new Array(24).fill(COVERED);
-  window.tiles = Array.from({length: 24}, (_, i) =>
+  window.tiles = Array.from({ length: 24 }, (_, i) =>
     ({ value: Math.floor(i / 2), order: Math.random() }))
       .sort((a, b) => a.order - b.order)
       .map(({ value: value }) => value);
   window.selection = new Array();
+
+  window.solved = 0;
+  window.currentScore = { moves: 0, time: 0, exists: true };
+  window.bestT = { moves: 0, time: 0, exists: false };
+  window.bestM = { moves: 0, time: 0, exists: false };
 
   updateDimensions();
 }
@@ -65,11 +68,23 @@ function onMouseUp() {
       window.tileStates[second] = SOLVED;
       renderTile(first);
       renderTile(second);
+      window.solved++;
       window.selection = new Array();
     } else {
       window.tileStates[first] = COVERED;
       window.tileStates[second] = COVERED;
     }
+    if (window.currentScore.moves == 0) {
+      window.timeKeeper = window.setInterval(() => {
+        window.currentScore.time++;
+        renderMeta();
+      }, 1000);
+    }
+    window.currentScore.moves++;
+    if (window.solved >= 12) {
+      window.clearInterval(window.timeKeeper);
+    }
+    renderMeta();
   }
 }
 
@@ -112,6 +127,7 @@ function updateDimensions() {
 
   for (var i = 0; i < 24; i++)
     renderTile(i);
+  renderMeta();
 }
 
 function renderTile(index) {
@@ -221,4 +237,38 @@ function renderSquare(cx, cy, r, color) {
   window.ctx.closePath();
   window.ctx.fillStyle = color;
   window.ctx.fill();
+}
+
+function renderMeta() {
+  var margin = window.tileDim / 10,
+      fontSize = window.tileDim / 6;
+      bx = margin,
+      by = window.canvas.height - margin,
+      cx = margin,
+      cy = fontSize + margin;
+  var current = scoreToText(window.currentScore),
+      bestM = "100|1000",
+      bestT = "100|1999";
+
+  window.ctx.clearRect(0, 0, window.canvas.width, window.offsetY);
+  window.ctx.clearRect(
+    0,
+    window.canvas.height - window.offsetY,
+    window.canvas.width,
+    window.offsetY
+  );
+
+  window.ctx.font = fontSize + "px Courier New";
+  window.ctx.fillStyle = "black";
+  window.ctx.fillText("[current: " + current + "]", cx, cy);
+  /*
+  window.ctx.fillText(
+    "[best(m): " + bestM + "] " + "[best(t): " + bestT + "]", bx, by);
+  */
+}
+
+function scoreToText(score) {
+  if (score.exists)
+    return score.moves + "|" + score.time
+  return "-"
 }

@@ -7,7 +7,6 @@ function init() {
   window.ctx = window.canvas.getContext("2d");
       
   window.canvas.addEventListener("mousemove", onMouseMove, true);
-  window.canvas.addEventListener("mousedown", onMouseDown, true);
   window.canvas.addEventListener("mouseup", onMouseUp, true);
 
   window.mouseX = 0;
@@ -41,9 +40,6 @@ function init() {
 function onMouseMove() {
   window.mouseX = window.event.pageX;
   window.mouseY = window.event.pageY;
-}
-
-function onMouseDown() {
 }
 
 function onMouseUp() {

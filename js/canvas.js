@@ -51,16 +51,27 @@ function onMouseDown() {
 function onMouseUp() {
   var index = getTileClicked();
   if (index < 0 || index >= 48 || window.tileStates[index] != COVERED) return;
-  /*
+
   if (window.selection.length == 2) {
-    window.selection[0];
-    window.selection[1];
-    if (window.selection[0] == window.selection[1]) {
-      window.tiles[window.selection[
+    for (const selection of window.selection) {
+      window.tileStates[selection] = COVERED;
+      renderTile(selection);
+    }
+    window.selection = new Array();
+  }
+  window.selection.push(index);
+  window.tileStates[index] = UNCOVERED;
+
+  if (window.selection.length == 2) {
+    var first = window.selection[0],
+        second = window.selection[1];
+    if (window.tiles[first] == window.tiles[second]) {
+      window.tileStates[first] = SOLVED;
+      window.tileStates[second] = SOLVED;
+      renderTile(first);
+      window.selection = new Array();
     }
   }
-  */
-  window.tileStates[index] = UNCOVERED;
   renderTile(index);
 }
 
@@ -112,7 +123,7 @@ function renderTile(index) {
       margin = window.tileDim / 50;
 
   window.ctx.beginPath();
-  window.ctx.lineWidth = 1;
+  window.ctx.lineWidth = 2;
   window.ctx.strokeStyle = "black";
   window.ctx.moveTo(x + r + margin, y + margin);
   window.ctx.lineTo(x + window.tileDim - r - margin, y + margin);
@@ -146,10 +157,9 @@ function renderTile(index) {
   );
   window.ctx.stroke();
 
-  if (window.tileStates[index] == SOLVED) {
-    window.ctx.fillStyle = "grey";
-    window.ctx.fill();
-  }
+  if (window.tileStates[index] == SOLVED) window.ctx.fillStyle = "grey";
+  else window.ctx.fillStyle = "white";
+  window.ctx.fill();
 
   if (window.tileStates[index] != COVERED) {
     var shapeRender = [renderStar, renderTriangle, renderCircle, renderSquare],

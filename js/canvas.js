@@ -55,6 +55,7 @@ function onMouseUp() {
   }
   window.selection.push(index);
   window.tileStates[index] = UNCOVERED;
+  renderTile(index);
 
   if (window.selection.length == 2) {
     var first = window.selection[0],
@@ -63,10 +64,13 @@ function onMouseUp() {
       window.tileStates[first] = SOLVED;
       window.tileStates[second] = SOLVED;
       renderTile(first);
+      renderTile(second);
       window.selection = new Array();
+    } else {
+      window.tileStates[first] = COVERED;
+      window.tileStates[second] = COVERED;
     }
   }
-  renderTile(index);
 }
 
 function getTileClicked() {

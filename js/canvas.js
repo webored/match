@@ -14,24 +14,22 @@ function init() {
   window.mouseY = 0;
 
   window.ratios = [
-    {width: 1, height: 48},
-    {width: 2, height: 24},
-    {width: 3, height: 16},
-    {width: 4, height: 12},
-    {width: 6, height: 8},
-    {width: 8, height: 6},
-    {width: 12, height: 4},
-    {width: 16, height: 3},
-    {width: 24, height: 2},
-    {width: 48, height: 1},
+    {width: 1, height: 24},
+    {width: 2, height: 12},
+    {width: 3, height: 8},
+    {width: 4, height: 6},
+    {width: 6, height: 4},
+    {width: 8, height: 3},
+    {width: 12, height: 2},
+    {width: 24, height: 1},
   ].map(x => ({
     width: x.width,
     height: x.height,
     ratio: x.width / x.height
   }));
 
-  window.tileStates = new Array(48).fill(COVERED);
-  window.tiles = Array.from({length: 48}, (_, i) =>
+  window.tileStates = new Array(24).fill(COVERED);
+  window.tiles = Array.from({length: 24}, (_, i) =>
     ({ value: Math.floor(i / 2), order: Math.random() }))
       .sort((a, b) => a.order - b.order)
       .map(({ value: value }) => value);
@@ -50,7 +48,7 @@ function onMouseDown() {
 
 function onMouseUp() {
   var index = getTileClicked();
-  if (index < 0 || index >= 48 || window.tileStates[index] != COVERED) return;
+  if (index < 0 || index >= 24 || window.tileStates[index] != COVERED) return;
 
   if (window.selection.length == 2) {
     for (const selection of window.selection) {
@@ -112,7 +110,7 @@ function updateDimensions() {
   window.offsetX = (width - (window.width * window.tileDim)) / 2;
   window.offsetY = (height - (window.height * window.tileDim)) / 2;
 
-  for (var i = 0; i < 48; i++)
+  for (var i = 0; i < 24; i++)
     renderTile(i);
 }
 
@@ -166,30 +164,17 @@ function renderTile(index) {
         colors = ["orange", "blue", "red"];
 
     var type = window.tiles[index],
-        fill = Boolean(type % 2),
-        shape = Math.floor((type % 8) / 2),
-        color = Math.floor(type / 8);
+        shape = type % 4;
+        color = Math.floor(type / 4);
 
     var cx = x + window.tileDim / 2,
         cy = y + window.tileDim / 2,
-        r = window.tileDim / 4,
-        th = window.tileDim / 20;
-    shapeRender[shape](cx, cy, r, th, colors[color], fill);
+        r = window.tileDim / 4;
+    shapeRender[shape](cx, cy, r, colors[color]);
   }
 }
 
-function completeSymbol(th, color, fill) {
-  if (fill) {
-    window.ctx.fillStyle = color;
-    window.ctx.fill();
-  } else {
-    window.ctx.lineWidth = th;
-    window.ctx.strokeStyle = color;
-    window.ctx.stroke();
-  }
-}
-
-function renderStar(cx, cy, r, th, color, fill) {
+function renderStar(cx, cy, r, color) {
   window.ctx.translate(cx, cy);
   window.ctx.beginPath();
   window.ctx.moveTo(0, -r);
@@ -200,11 +185,12 @@ function renderStar(cx, cy, r, th, color, fill) {
     window.ctx.lineTo(0, -r);
   }
   window.ctx.closePath();
-  completeSymbol(th, color, fill)
+  window.ctx.fillStyle = color;
+  window.ctx.fill();
   window.ctx.translate(-cx, -cy);
 }
 
-function renderTriangle(cx, cy, r, th, color, fill) {
+function renderTriangle(cx, cy, r, color) {
   window.ctx.translate(cx, cy);
   window.ctx.beginPath();
   window.ctx.moveTo(0, -r);
@@ -214,22 +200,25 @@ function renderTriangle(cx, cy, r, th, color, fill) {
   }
   window.ctx.rotate(2 * Math.PI / 3);
   window.ctx.closePath();
-  completeSymbol(th, color, fill)
+  window.ctx.fillStyle = color;
+  window.ctx.fill();
   window.ctx.translate(-cx, -cy);
 }
 
-function renderCircle(cx, cy, r, th, color, fill) {
+function renderCircle(cx, cy, r, color) {
   window.ctx.beginPath(); 
   window.ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-  completeSymbol(th, color, fill)
+  window.ctx.fillStyle = color;
+  window.ctx.fill();
 }
 
-function renderSquare(cx, cy, r, th, color, fill) {
+function renderSquare(cx, cy, r, color) {
   window.ctx.beginPath();
   window.ctx.moveTo(cx - r, cy - r);
   window.ctx.lineTo(cx + r, cy - r);
   window.ctx.lineTo(cx + r, cy + r);
   window.ctx.lineTo(cx - r, cy + r);
   window.ctx.closePath();
-  completeSymbol(th, color, fill)
+  window.ctx.fillStyle = color;
+  window.ctx.fill();
 }

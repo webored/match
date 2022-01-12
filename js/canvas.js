@@ -1,3 +1,7 @@
+const COVERED = 1,
+      UNCOVERED = 2,
+      SOLVED = 3;
+
 function init() {
   window.canvas = document.getElementById("canvas");
   window.ctx = window.canvas.getContext("2d");
@@ -26,6 +30,13 @@ function init() {
     ratio: x.width / x.height
   }));
 
+  window.tileStates = new Array(48).fill(COVERED);
+  window.tiles = Array.from({length: 48}, (_, i) =>
+    ({ value: Math.floor(i / 2), order: Math.random() }))
+      .sort((a, b) => a.order - b.order)
+      .map(({ value: value }) => value);
+  window.selection = new Array();
+
   updateDimensions();
 }
 
@@ -39,6 +50,16 @@ function onMouseDown() {
 
 function onMouseUp() {
   var index = getTileClicked();
+  if (index < 0 || window.tileStates[index] != COVERED) return;
+  /*
+  if (window.selection.length == 2) {
+    window.selection[0];
+    window.selection[1];
+    if (window.selection[0] == window.selection[1]) {
+      window.tiles[window.selection[
+    }
+  }
+  */
 }
 
 function getTileClicked() {
@@ -89,7 +110,8 @@ function renderTile(index) {
       margin = window.tileDim / 50;
 
   window.ctx.beginPath();
-  window.ctx.strokeStyle="black";
+  window.ctx.lineWidth = 1;
+  window.ctx.strokeStyle = "black";
   window.ctx.moveTo(x + r + margin, y + margin);
   window.ctx.lineTo(x + window.tileDim - r - margin, y + margin);
   window.ctx.quadraticCurveTo(
@@ -116,6 +138,86 @@ function renderTile(index) {
     y + window.tileDim - r - margin
   );
   window.ctx.lineTo(x + margin, y + r + margin);
-  window.ctx.quadraticCurveTo(x + margin, y + margin, x + r + margin, y + margin);
+  window.ctx.quadraticCurveTo(
+    x + margin, y + margin,
+    x + r + margin, y + margin
+  );
   window.ctx.stroke();
+
+  if (window.tileStates[index] == UNCOVERED) {
+    window.ctx.fillStyle = "grey";
+    window.ctx.fill();
+  }
+
+  if (window.tileStates[index] != COVERED) {
+    var shapeRender = [renderStar, renderTriangle, renderCircle, renderSquare],
+        colors = ["orange", "blue", "red"];
+
+    var type = window.tiles[index],
+        fill = Boolean(type % 2),
+        shape = Math.floor((type % 8) / 2),
+        color = Math.floor(type / 8);
+
+    var cx = x + window.tileDim / 2,
+        cy = y + window.tileDim / 2,
+        r = window.tileDim / 4,
+        th = window.tileDim / 20;
+    shapeRender[shape](cx, cy, r, th, colors[color], fill);
+  }
+}
+
+function completeSymbol(th, color, fill) {
+  if (fill) {
+    window.ctx.fillStyle = color;
+    window.ctx.fill();
+  } else {
+    window.ctx.lineWidth = th;
+    window.ctx.strokeStyle = color;
+    window.ctx.stroke();
+  }
+}
+
+function renderStar(cx, cy, r, th, color, fill) {
+  window.ctx.translate(cx, cy);
+  window.ctx.beginPath();
+  window.ctx.moveTo(0, -r);
+  for (var i = 0; i < 5; i++) {
+    window.ctx.rotate(Math.PI / 5);
+    window.ctx.lineTo(0, -(r / 2));
+    window.ctx.rotate(Math.PI / 5);
+    window.ctx.lineTo(0, -r);
+  }
+  window.ctx.closePath();
+  completeSymbol(th, color, fill)
+  window.ctx.translate(-cx, -cy);
+}
+
+function renderTriangle(cx, cy, r, th, color, fill) {
+  window.ctx.translate(cx, cy);
+  window.ctx.beginPath();
+  window.ctx.moveTo(0, -r);
+  for (var i = 0; i < 2; i++) {
+    window.ctx.rotate(2 * Math.PI / 3);
+    window.ctx.lineTo(0, -r);
+  }
+  window.ctx.rotate(2 * Math.PI / 3);
+  window.ctx.closePath();
+  completeSymbol(th, color, fill)
+  window.ctx.translate(-cx, -cy);
+}
+
+function renderCircle(cx, cy, r, th, color, fill) {
+  window.ctx.beginPath(); 
+  window.ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  completeSymbol(th, color, fill)
+}
+
+function renderSquare(cx, cy, r, th, color, fill) {
+  window.ctx.beginPath();
+  window.ctx.moveTo(cx - r, cy - r);
+  window.ctx.lineTo(cx + r, cy - r);
+  window.ctx.lineTo(cx + r, cy + r);
+  window.ctx.lineTo(cx - r, cy + r);
+  window.ctx.closePath();
+  completeSymbol(th, color, fill)
 }

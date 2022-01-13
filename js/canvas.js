@@ -37,6 +37,8 @@ function init() {
   window.bestT = { moves: 0, time: 0, exists: false };
   window.bestM = { moves: 0, time: 0, exists: false };
 
+  window.timeKeeper = undefined;
+
   updateDimensions();
 }
 
@@ -46,6 +48,14 @@ function onMouseMove() {
 }
 
 function onMouseUp() {
+  if (Math.pow(window.mouseX - window.restartX, 2) +
+      Math.pow(window.mouseY - window.restartY, 2) <
+      Math.pow(window.restartR, 2)) {
+    if (window.timeKeeper) window.clearInterval(window.timeKeeper);
+    init();
+    return;
+  }
+
   var index = getTileClicked();
   if (index < 0 || index >= 24 || window.tileStates[index] != COVERED) return;
 
@@ -124,6 +134,10 @@ function updateDimensions() {
   );
   window.offsetX = (width - (window.width * window.tileDim)) / 2;
   window.offsetY = (height - (window.height * window.tileDim)) / 2;
+
+  window.restartX = width - window.tileDim / 4;
+  window.restartY = window.tileDim / 4;
+  window.restartR = window.tileDim / 7;
 
   for (var i = 0; i < 24; i++)
     renderTile(i);
@@ -265,6 +279,33 @@ function renderMeta() {
   window.ctx.fillText(
     "[best(m): " + bestM + "] " + "[best(t): " + bestT + "]", bx, by);
   */
+  renderRestart();
+}
+
+function renderRestart() {
+  var x = window.restartX,
+      y = window.restartY,
+      r = window.restartR,
+      th = window.tileDim / 30,
+      ar = window.tileDim / 25;
+
+  window.ctx.translate(x, y);
+  window.ctx.rotate(Math.PI * 7 / 4);
+  window.ctx.beginPath(); 
+  window.ctx.moveTo(r - ar, -ar);
+  window.ctx.lineTo(r + ar, -ar);
+  window.ctx.lineTo(r, ar);
+  window.ctx.closePath();
+  window.ctx.fillStyle = "black";
+  window.ctx.fill();
+
+  window.ctx.beginPath(); 
+  window.ctx.arc(0, 0, r, Math.PI * 5 / 12, 2 * Math.PI);
+  window.ctx.strokeStyle = "black";
+  window.ctx.lineWidth = th;
+  window.ctx.stroke();
+  window.ctx.rotate(-Math.PI * 7 / 4);
+  window.ctx.translate(-x, -y);
 }
 
 function scoreToText(score) {

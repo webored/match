@@ -361,5 +361,4 @@ function setCookie(score, cookie) {
     document.cookie =
       cookie + "=" + score.moves + "|" + score.time + ";" +
       "max-age=" + YEAR + ";";
-  alert(document.cookie);
 }

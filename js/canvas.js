@@ -62,11 +62,13 @@ function onMouseUp() {
   if (index < 0 || index >= 24 || window.tileStates[index] != COVERED) return;
 
   if (window.selection.length == 2) {
-    for (const selection of window.selection) {
-      window.tileStates[selection] = COVERED;
-      renderTile(selection);
-    }
+    var first = window.selection[0],
+        second = window.selection[1]
+    window.tileStates[first] = COVERED;
+    window.tileStates[second] = COVERED;
     window.selection = new Array();
+    renderTile(first);
+    renderTile(second);
   }
   window.selection.push(index);
   window.tileStates[index] = UNCOVERED;
@@ -207,7 +209,7 @@ function renderTile(index) {
   else window.ctx.fillStyle = "white";
   window.ctx.fill();
 
-  if (window.tileStates[index] != COVERED) {
+  if (window.tileStates[index] != COVERED || window.selection.includes(index)) {
     var shapeRender = [renderStar, renderTriangle, renderCircle, renderSquare],
         colors = ["orange", "blue", "red"];
 

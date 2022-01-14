@@ -2,6 +2,8 @@ const COVERED = 1,
       UNCOVERED = 2,
       SOLVED = 3;
 
+const YEAR = 12 * 30 * 24 * 60 * 60;
+
 function init() {
   window.canvas = document.getElementById("canvas");
   window.ctx = window.canvas.getContext("2d");
@@ -34,12 +36,12 @@ function init() {
 
   window.solved = 0;
   window.currentScore = { moves: 0, time: 0, exists: true };
-  window.bestT = { moves: 0, time: 0, exists: false };
-  window.bestM = { moves: 0, time: 0, exists: false };
-
+  processCookie();
+  
   window.timeKeeper = undefined;
 
   updateDimensions();
+  renderMeta();
 }
 
 function onMouseMove() {
@@ -91,10 +93,26 @@ function onMouseUp() {
       }, 1000);
     }
     window.currentScore.moves++;
+    renderMeta();
     if (window.solved >= 12) {
       window.clearInterval(window.timeKeeper);
+      if (!window.bestM.exists ||
+          window.currentScore.moves < window.bestM.moves)
+        window.bestM = {
+          moves: window.currentScore.moves,
+          time: window.currentScore.time,
+          exists: true,
+        };
+      if (!window.bestT.exists ||
+          window.currentScore.time < window.bestT.time)
+        window.bestT = {
+          moves: window.currentScore.moves,
+          time: window.currentScore.time,
+          exists: true,
+        };
+      setCookie(window.bestM, "bestMoves");
+      setCookie(window.bestT, "bestTime");
     }
-    renderMeta();
   }
 }
 
@@ -261,8 +279,8 @@ function renderMeta() {
       cx = margin,
       cy = fontSize + margin;
   var current = scoreToText(window.currentScore),
-      bestM = "100|1000",
-      bestT = "100|1999";
+      bestM = scoreToText(window.bestM),
+      bestT = scoreToText(window.bestT);
 
   window.ctx.clearRect(0, 0, window.canvas.width, window.offsetY);
   window.ctx.clearRect(
@@ -275,10 +293,8 @@ function renderMeta() {
   window.ctx.font = fontSize + "px Courier New";
   window.ctx.fillStyle = "black";
   window.ctx.fillText("[current: " + current + "]", cx, cy);
-  /*
   window.ctx.fillText(
     "[best(m): " + bestM + "] " + "[best(t): " + bestT + "]", bx, by);
-  */
   renderRestart();
 }
 
@@ -312,4 +328,38 @@ function scoreToText(score) {
   if (score.exists)
     return score.moves + "|" + score.time
   return "-"
+}
+
+function processCookie() {
+  window.bestM = { moves: 0, time: 0, exists: false };
+  window.bestT = { moves: 0, time: 0, exists: false };
+
+  var cookie = document.cookie.split(";");
+  for (var i = 0; i < cookie.length; i++) {
+    var pair = cookie[i].split("=");
+    if ("bestMoves" == pair[0].trim()) {
+      var score = pair[1].trim().split("|");
+      window.bestM = {
+        moves: parseInt(score[0]),
+        time: parseInt(score[1]),
+        exists: true,
+      };
+    } else if ("bestTime" == pair[0].trim()) {
+      var score = pair[1].trim().split("|");
+      window.bestT = {
+        moves: parseInt(score[0]),
+        time: parseInt(score[1]),
+        exists: true,
+      }
+    }
+  }
+  renderMeta();
+}
+
+function setCookie(score, cookie) {
+  if (score.exists)
+    document.cookie =
+      cookie + "=" + score.moves + "|" + score.time + ";" +
+      "max-age=" + YEAR + ";";
+  alert(document.cookie);
 }
